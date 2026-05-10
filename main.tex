@@ -56,48 +56,31 @@ In high-dimensional applications, however, $d$ may be of order thousands while o
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[
-    box/.style={draw, rounded corners=1pt, minimum height=8mm, minimum width=17mm, font=\footnotesize, align=center, inner sep=1.5pt},
-    accent/.style={box, fill=blue!8, draw=blue!55!black},
+    box/.style={draw, rounded corners=1pt, minimum height=8.5mm, minimum width=22mm, font=\footnotesize, align=center, inner sep=2pt},
+    accent/.style={box, fill=blue!10, draw=blue!55!black},
     >={Stealth[length=1.6mm,width=1.6mm]}
 ]
-% --- Mini IEEE-33-style radial feeder schematic on the left ---
-\node[draw, rounded corners=1pt, minimum width=20mm, minimum height=14mm, inner sep=0pt] (env) at (0,0) {};
-\begin{scope}[shift={(env.center)}, scale=0.11, every node/.style={inner sep=0pt}]
-  % slack (square)
-  \draw[fill=black] (-9,2) rectangle ++(2,2);
-  \node[font=\tiny\bfseries, anchor=east] at (-9.5,3) {};
-  % main feeder buses (5)
-  \foreach \i in {0,1,2,3,4} {\filldraw[black] (\i*4,3) circle (1.0);}
-  \draw[line width=0.5pt] (-7,3) -- (16,3);
-  % lateral
-  \filldraw[black] (0,-3) circle (1.0);
-  \filldraw[black] (0,-9) circle (1.0);
-  \draw[line width=0.5pt] (0,3) -- (0,-9);
-  % targets (red)
-  \draw[red, line width=1.0pt] (8,3) circle (2.0);
-  \draw[red, line width=1.0pt] (16,3) circle (2.0);
-  \draw[red, line width=1.0pt] (0,-9) circle (2.0);
-\end{scope}
-\node[font=\scriptsize] at ($(env.south) + (0,-2mm)$) {radial feeder};
-
-% --- Estimator + actuation chain ---
-\node[accent, right=8mm of env] (lasso) {LASSO\\ $\hat S_a$};
-\node[accent, right=3mm of lasso] (ts) {FG Thompson\\ sampling};
-\node[box, right=8mm of ts] (act) {action $a_t$};
-\node[box, below=5mm of lasso, minimum width=17mm] (buf) {buffer $\mathcal{D}_a$};
+% Top row: 4 equal-width boxes
+\node[box] (ctx) {context $x_t$};
+\node[accent, right=3.5mm of ctx] (lasso) {LASSO refit\\[-1pt]\scriptsize(every $\tau_0$)};
+\node[accent, right=2.5mm of lasso] (ts) {Thompson sample\\[-1pt]\scriptsize on $\hat S_a$ (every $t$)};
+\node[box, right=3.5mm of ts] (arm) {arm $a_t$};
 
 % Dashed group around the decoupled estimator
 \node[draw, dashed, rounded corners=2pt, fit=(lasso)(ts), inner sep=2mm,
-      label={[font=\scriptsize\itshape, yshift=-0.5mm]above:decoupled sparse estimator}] (group) {};
+      label={[font=\scriptsize\itshape, yshift=-0.5mm]above:decoupled estimator}] (group) {};
 
-% Arrows
-\draw[->] (env.east) -- node[above, font=\scriptsize]{$x_t$} ([xshift=-0.5mm]lasso.west);
-\draw[->] (lasso.east) -- node[above, font=\scriptsize]{$\hat S_a$} (ts.west);
-\draw[->] (ts.east) -- (act.west);
-\draw[->] (act.south) |- node[pos=0.78, above, font=\scriptsize]{$y_t$} (buf.east);
-\draw[->] (buf.north) -- (lasso.south);
+% Buffer below, wide
+\node[box, minimum width=42mm, below=6mm of group] (buf) {per-arm buffer $\mathcal{D}_a$};
+
+% Arrows: solid = fast path, dashed = slow path
+\draw[->] (ctx.east) -- (lasso.west);
+\draw[->, dashed] (lasso.east) -- node[above, font=\scriptsize]{$\hat S_a$} (ts.west);
+\draw[->] (ts.east) -- (arm.west);
+\draw[->] (arm.south) |- node[pos=0.95, above, font=\scriptsize]{$y_t$} (buf.east);
+\draw[->] (buf.west) -| (lasso.south);
 \end{tikzpicture}
-\caption{FGTS-LASSO architecture. Per-arm LASSO refits identify a sparse support $\hat S_a$ on the path from the slack bus (square) to a target bus (red); feature-Gaussian Thompson Sampling explores within the recovered subspace. The decoupled estimator (dashed box) reduces per-round cost from $\mathcal{O}(d^2)$ to $\mathcal{O}(s^2)$.}
+\caption{FGTS-LASSO architecture. The decoupled estimator (dashed box) runs LASSO refit on the slow timescale $\tau_0 = \mathcal{O}(Ks\log d)$ to recover the active support $\hat S_a$ (dashed arrow), while feature-Gaussian Thompson Sampling on $\hat S_a$ runs every round (solid arrows). The buffer $\mathcal{D}_a$ feeds both paths.}
 \label{fig:schematic}
 \end{figure}
 
