@@ -16,3 +16,14 @@ venv/
 
 # Tmp
 *.swp
+
+# Paper sources (kept locally, not in repo)
+paper/
+fgts-lasso-overleaf.zip
+*.aux
+*.log
+*.bbl
+*.blg
+*.out
+*.pdf
+*-eps-converted-to.pdf
