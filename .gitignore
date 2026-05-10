@@ -10,6 +10,7 @@
 *.fls
 *.fdb_latexmk
 *.synctex.gz
+*-eps-converted-to.pdf
 *.nav
 *.snm
 *.vrb
