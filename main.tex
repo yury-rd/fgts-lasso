@@ -56,31 +56,37 @@ In high-dimensional applications, however, $d$ may be of order thousands while o
 \begin{figure}[t]
 \centering
 \begin{tikzpicture}[
-    box/.style={draw, rounded corners=1pt, minimum height=8.5mm, minimum width=22mm, font=\footnotesize, align=center, inner sep=2pt},
-    accent/.style={box, fill=blue!10, draw=blue!55!black},
-    >={Stealth[length=1.6mm,width=1.6mm]}
+    box/.style={draw, line width=0.45pt, rounded corners=1.2pt, minimum height=9mm, minimum width=20mm, font=\footnotesize, align=center, inner sep=2.5pt},
+    accent/.style={box, fill=blue!9, draw=blue!55!black},
+    buffer/.style={box, fill=gray!8, draw=gray!50!black},
+    >={Stealth[length=1.8mm,width=1.8mm]},
+    every path/.style={line width=0.5pt}
 ]
 % Top row: 4 equal-width boxes
 \node[box] (ctx) {context $x_t$};
-\node[accent, right=3.5mm of ctx] (lasso) {LASSO refit\\[-1pt]\scriptsize(every $\tau_0$)};
-\node[accent, right=2.5mm of lasso] (ts) {Thompson sample\\[-1pt]\scriptsize on $\hat S_a$ (every $t$)};
-\node[box, right=3.5mm of ts] (arm) {arm $a_t$};
+\node[accent, right=3mm of ctx] (lasso) {LASSO refit\\[-1pt]\scriptsize every $\tau_0$ rounds};
+\node[accent, right=2.5mm of lasso] (ts) {Thompson sample\\[-1pt]\scriptsize on $\hat S_a$, every $t$};
+\node[box, right=3mm of ts] (arm) {arm $a_t$};
 
 % Dashed group around the decoupled estimator
-\node[draw, dashed, rounded corners=2pt, fit=(lasso)(ts), inner sep=2mm,
-      label={[font=\scriptsize\itshape, yshift=-0.5mm]above:decoupled estimator}] (group) {};
+\node[draw, line width=0.5pt, dashed, rounded corners=2pt, fit=(lasso)(ts), inner sep=2.2mm,
+      label={[font=\scriptsize\itshape, yshift=-0.8mm]above:decoupled estimator}] (group) {};
 
-% Buffer below, wide
-\node[box, minimum width=42mm, below=6mm of group] (buf) {per-arm buffer $\mathcal{D}_a$};
+% Wide buffer spanning the whole top row, centered horizontally
+\node[buffer, anchor=north, minimum width=82mm, minimum height=8mm] (buf)
+      at ($(ctx.south)!0.5!(arm.south) + (0,-9mm)$)
+      {per-arm buffer $\mathcal{D}_a = \{(x_\tau, y_\tau)\}_{\tau \leq t}$};
 
-% Arrows: solid = fast path, dashed = slow path
+% Top-row arrows: solid = fast path, dashed = slow LASSO update
 \draw[->] (ctx.east) -- (lasso.west);
-\draw[->, dashed] (lasso.east) -- node[above, font=\scriptsize]{$\hat S_a$} (ts.west);
+\draw[->, dashed] (lasso.east) -- node[above=0.5pt, font=\scriptsize]{$\hat S_a$} (ts.west);
 \draw[->] (ts.east) -- (arm.west);
-\draw[->] (arm.south) |- node[pos=0.95, above, font=\scriptsize]{$y_t$} (buf.east);
-\draw[->] (buf.west) -| (lasso.south);
+
+% Closed bandit loop: vertical arrows arm down + buffer up to LASSO
+\draw[->] (arm.south) -- node[right=0.5pt, font=\scriptsize]{$y_t$} (arm.south |- buf.north);
+\draw[->] (buf.north -| lasso.south) -- (lasso.south);
 \end{tikzpicture}
-\caption{FGTS-LASSO architecture. The decoupled estimator (dashed box) runs LASSO refit on the slow timescale $\tau_0 = \mathcal{O}(Ks\log d)$ to recover the active support $\hat S_a$ (dashed arrow), while feature-Gaussian Thompson Sampling on $\hat S_a$ runs every round (solid arrows). The buffer $\mathcal{D}_a$ feeds both paths.}
+\caption{FGTS-LASSO architecture. The decoupled estimator (dashed box) runs LASSO support recovery on the slow timescale $\tau_0 = \mathcal{O}(Ks\log d)$, signalling the active support $\hat S_a$ to the fast Thompson-sampling path (dashed arrow). The per-arm buffer $\mathcal{D}_a$ closes the bandit loop and feeds both timescales.}
 \label{fig:schematic}
 \end{figure}
 
