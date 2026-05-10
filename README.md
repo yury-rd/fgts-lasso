@@ -1,9 +1,8 @@
 # FGTS-LASSO: Decoupled Sparse Thompson Sampling for High-Dimensional Linear Contextual Bandits
 
 Reference implementation and reproducibility artefacts for the IEEE Control
-Systems Letters submission *"Decoupled Sparse Thompson Sampling for
-High-Dimensional Linear Contextual Bandits with Application to Volt/VAR
-Control"* by E. Suraveikin, A. Golubev, R. Sultimov, A. Volkov, and Y. Maximov.
+Systems Letters submission *"Sparse Linear Bandits with LASSO Support Recovery for Online Voltage
+Regulation"* by E. Suraveikin, A. Golubev, R. Sultimov, A. Volkov, and Y. Maximov.
 
 ## Contents
 
@@ -65,7 +64,7 @@ pdflatex main.tex
 ```bibtex
 @article{suraveikin2026fgts,
   author  = {Suraveikin, Egor and Golubev, Alexey and Sultimov, Roman and Volkov, Alexander and Maximov, Yury},
-  title   = {Decoupled Sparse Thompson Sampling for High-Dimensional Linear Contextual Bandits with Application to {Volt/VAR} Control},
+  title   = {Sparse Linear Bandits with {LASSO} Support Recovery for Online Voltage Regulation},
   journal = {IEEE Control Systems Letters},
   year    = {2026}
 }
